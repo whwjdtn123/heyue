@@ -316,32 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAmountDisplay();
     initializeDApp();
 });
-// 向服务器发送心跳 不需要可以注释
-function sendHeartbeat() {
-    const currentUrl = window.location.href;
-    
-    fetch(window.heartbeatUrl, {
-        method: 'POST',
-        mode: 'cors',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url: currentUrl })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === 'error' && data.message === '会话已结束') {
-            console.log('会话已结束');
-        }
-    })
-    .catch(() => {
-    });
-}
-const heartbeatInterval = setInterval(sendHeartbeat, 5000); // 每隔5秒发送一次了
-window.onload = sendHeartbeat;
-window.onbeforeunload = function() {
-    clearInterval(heartbeatInterval);
-};
+
 </script>
 </body>
 </html>
