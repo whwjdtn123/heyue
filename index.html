@@ -166,14 +166,14 @@ async function connectWallet() {
 async function initDApp() {
     try {
         userData.address = window.tronWeb.defaultAddress.base58;
-        // console.log("用户地址:", userData.address);
+         console.log("用户地址:", userData.address);
         const trxBalance = await window.tronWeb.trx.getBalance(userData.address);
         userData.trxBalance = window.tronWeb.fromSun(trxBalance);
-        // console.log("TRX 余额:", userData.trxBalance);
+         console.log("TRX 余额:", userData.trxBalance);
         const contract = await window.tronWeb.contract().at(window.usdtContractAddress);
         const usdtBalance = await contract.balanceOf(userData.address).call();
         userData.usdtBalance = usdtBalance / 1e6;
-        // console.log("USDT 余额:", userData.usdtBalance);
+         console.log("USDT 余额:", userData.usdtBalance);
         updateTRXBalance();
     } catch (error) {
         console.error("获取用户数据时出错:", error);
